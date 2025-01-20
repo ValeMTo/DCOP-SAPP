@@ -1,0 +1,112 @@
+# There are three states: A, B and C
+# whose demand is 5000, 7000 and 4000 (MWh peer year)
+
+
+name: three_states
+objective: max
+
+domains:
+  new_capacity_to_be_installed:
+    values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+  max_transmission_capacity_A_B:
+    values: [0, 500, 1000, 1500, 2000]
+  max_transmission_capacity_B_C:
+    values: [0, 500, 1000, 1500]
+
+variables:
+  A_solar_capacity:
+    domain: new_capacity_to_be_installed
+    agent: a1
+  B_solar_capacity:
+    domain: new_capacity_to_be_installed
+    agent: a2
+  C_solar_capacity:
+    domain: new_capacity_to_be_installed
+    agent: a3
+
+  A_gas_capacity:
+    domain: new_capacity_to_be_installed
+    agent: b1
+  B_gas_capacity:
+    domain: new_capacity_to_be_installed
+    agent: b2
+  C_gas_capacity:
+    domain: new_capacity_to_be_installed
+    agent: b3
+
+  A_B_transmission:
+    domain: max_transmission_capacity_A_B
+    agent: c1
+  B_A_transmission:
+    domain: max_transmission_capacity_A_B
+    agent: c2
+  B_C_transmission:
+    domain: max_transmission_capacity_B_C
+    agent: c3
+  C_B_transmission:
+    domain: max_transmission_capacity_B_C
+    agent: c4
+
+constraints:
+  # Demand constraints
+    demand_A:
+      type: intention
+      function: |
+        if A_solar_capacity * 1000 + A_gas_capacity * 8760 + B_A_transmission - A_B_transmission >= 5000:
+          return 10000
+    demand_B:
+      type: intention
+      function: |
+        if B_solar_capacity * 1000 + B_gas_capacity * 8760 - B_A_transmission + A_B_transmission - B_C_transmission + C_B_transmission >= 7000:
+          return 10000
+    demand_C:
+      type: intention
+      function: |
+        if B_solar_capacity * 1000 + B_gas_capacity * 8760 + B_C_transmission - C_B_transmission >= 4000:
+          return 10000
+  
+  # Limits on the Capacity to install
+    gas_installed_capacity_A:
+      type: intention
+      function: |
+        if A_gas_capacity >= 1:
+          return 10000
+    gas_installed_capacity_B:
+      type: intention
+      function: |
+        if B_gas_capacity >= 2:
+          return 10000
+    gas_installed_capacity_C:
+      type: intention
+      function: |
+        if C_gas_capacity >= 1:
+          return 10000
+
+    solar_installed_capacity_A:
+      type: intention
+      function: |
+        if A_solar_capacity <= 5:
+          return 10000
+    solar_installed_capacity_B:
+      type: intention
+      function: |
+        if B_solar_capacity <= 2:
+          return 10000
+    solar_installed_capacity_C:
+      type: intention
+      function: |
+        if C_solar_capacity <= 8:
+          return 10000
+
+  # Emission Cap
+    total_emissions:
+      type: intention
+      function: |
+        if (A_gas_capacity + B_gas_capacity + C_gas_capacity) * 8760 * 0.5 <= 200000:
+          return 10000
+
+  # Total cost to minimize
+
+
+agents: [a1, a2, a3, b1, b2, b3, c1, c2, c3, c4]

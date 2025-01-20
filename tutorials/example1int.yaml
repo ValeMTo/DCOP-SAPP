@@ -1,0 +1,50 @@
+name: example1
+objective: min
+
+domains:
+  bools:
+    values: [0, 1]
+
+variables:
+  v1:
+    domain: bools
+  v2:
+    domain: bools
+  v3:
+    domain: bools
+
+constraints:
+    c_1_2:
+      type: intention
+      function: |
+        if v1 == 0 and v2 == 0:
+            return 1
+        else:
+            if v1 == 1 and v2 == 1:
+              return 2
+            else:
+                return 0
+
+    c_1_3:
+      type: intention
+      function: |
+        if v1 == 0 and v3 == 0:
+            return 1
+        else:
+            if v1 == 1 and v3 == 1:
+              return 2
+            else:
+                return 0
+
+    c_2_3:
+      type: intention
+      function: |
+        if v2 == 0 and v3 == 0:
+            return 1
+        else:
+            if v2 == 1 and v3 == 1:
+              return 2
+            else:
+                return 0
+
+agents: [a1, a2, a3]
