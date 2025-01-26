@@ -15,36 +15,36 @@ domains:
     values: [0, 500, 1000, 1500]
 
 variables:
-  A_solar_capacity:
+  solarCapacityA:
     domain: new_capacity_to_be_installed
     agent: a1
-  B_solar_capacity:
+  solarCapacityB:
     domain: new_capacity_to_be_installed
     agent: a2
-  C_solar_capacity:
+  solarCapacityC:
     domain: new_capacity_to_be_installed
     agent: a3
 
-  A_gas_capacity:
+  gasCapacityA:
     domain: new_capacity_to_be_installed
     agent: b1
-  B_gas_capacity:
+  gasCapacityB:
     domain: new_capacity_to_be_installed
     agent: b2
-  C_gas_capacity:
+  gasCapacityC:
     domain: new_capacity_to_be_installed
     agent: b3
 
-  A_B_transmission:
+  transmissionAB:
     domain: max_transmission_capacity_A_B
     agent: c1
-  B_A_transmission:
+  transmissionBA:
     domain: max_transmission_capacity_A_B
     agent: c2
-  B_C_transmission:
+  transmissionBC:
     domain: max_transmission_capacity_B_C
     agent: c3
-  C_B_transmission:
+  transmissionCB:
     domain: max_transmission_capacity_B_C
     agent: c4
 
@@ -53,58 +53,77 @@ constraints:
     demand_A:
       type: intention
       function: |
-        if A_solar_capacity * 1000 + A_gas_capacity * 8760 + B_A_transmission - A_B_transmission >= 5000:
+        if solarCapacityA * 1000 + gasCapacityA * 8760 + transmissionBA - transmissionAB >= 5000:
           return 10000
+        else: 
+          return 0
     demand_B:
       type: intention
       function: |
-        if B_solar_capacity * 1000 + B_gas_capacity * 8760 - B_A_transmission + A_B_transmission - B_C_transmission + C_B_transmission >= 7000:
+        if solarCapacityB * 1000 + gasCapacityB * 8760 - transmissionBA + transmissionAB - transmissionBC + transmissionCB >= 7000:
           return 10000
+        else: 
+          return 0          
     demand_C:
       type: intention
       function: |
-        if B_solar_capacity * 1000 + B_gas_capacity * 8760 + B_C_transmission - C_B_transmission >= 4000:
+        if solarCapacityB * 1000 + gasCapacityB * 8760 + transmissionBC - transmissionCB >= 4000:
           return 10000
+        else: 
+          return 0
   
   # Limits on the Capacity to install
     gas_installed_capacity_A:
       type: intention
       function: |
-        if A_gas_capacity >= 1:
+        if gasCapacityA >= 1:
           return 10000
+        else:
+          return 0
     gas_installed_capacity_B:
       type: intention
       function: |
-        if B_gas_capacity >= 2:
+        if gasCapacityB >= 2:
           return 10000
+        else:
+          return 0
     gas_installed_capacity_C:
       type: intention
       function: |
-        if C_gas_capacity >= 1:
+        if gasCapacityC >= 1:
           return 10000
-
+        else:
+          return 0
     solar_installed_capacity_A:
       type: intention
       function: |
-        if A_solar_capacity <= 5:
+        if solarCapacityA <= 5:
           return 10000
+        else:
+          return 0
     solar_installed_capacity_B:
       type: intention
       function: |
-        if B_solar_capacity <= 2:
+        if solarCapacityB <= 2:
           return 10000
+        else:
+          return 0 
     solar_installed_capacity_C:
       type: intention
       function: |
-        if C_solar_capacity <= 8:
+        if solarCapacityC <= 8:
           return 10000
+        else:
+          return 0
 
   # Emission Cap
     total_emissions:
       type: intention
       function: |
-        if (A_gas_capacity + B_gas_capacity + C_gas_capacity) * 8760 * 0.5 <= 200000:
+        if (gasCapacityA + gasCapacityB + gasCapacityC) * 8760 * 0.5 <= 200000:
           return 10000
+        else:
+          return 0
 
   # Total cost to minimize
 
