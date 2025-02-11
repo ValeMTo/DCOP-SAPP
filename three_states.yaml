@@ -3,26 +3,18 @@
 
 
 name: three_states
-objective: min
+objective: max
 
 domains:
   new_capacity_to_be_installed:
     values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   capacity_factor:
-    values: [0.  , 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1 ,
-       0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2 , 0.21,
-       0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.3 , 0.31, 0.32,
-       0.33, 0.34, 0.35, 0.36, 0.37, 0.38, 0.39, 0.4 , 0.41, 0.42, 0.43,
-       0.44, 0.45, 0.46, 0.47, 0.48, 0.49, 0.5 , 0.51, 0.52, 0.53, 0.54,
-       0.55, 0.56, 0.57, 0.58, 0.59, 0.6 , 0.61, 0.62, 0.63, 0.64, 0.65,
-       0.66, 0.67, 0.68, 0.69, 0.7 , 0.71, 0.72, 0.73, 0.74, 0.75, 0.76,
-       0.77, 0.78, 0.79, 0.8 , 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87,
-       0.88, 0.89, 0.9 , 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98,
-       0.99]
+    values: [0. , 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1. ]
   max_transmission_capacity_A_B:
     values: [0, 500, 1000, 1500, 2000]
   max_transmission_capacity_B_C:
     values: [0, 500, 1000, 1500]
+
 
 variables:
   solarCapacityA:
@@ -30,144 +22,267 @@ variables:
     agent: a1
   solarCapacityB:
     domain: new_capacity_to_be_installed
-    agent: a2
+    agent: b1
   solarCapacityC:
     domain: new_capacity_to_be_installed
-    agent: a3
-
+    agent: c1
   gasCapacityA:
     domain: new_capacity_to_be_installed
-    agent: b1
+    agent: a2
   gasCapacityB:
     domain: new_capacity_to_be_installed
     agent: b2
   gasCapacityC:
     domain: new_capacity_to_be_installed
-    agent: b3
-
+    agent: c2
   gasFactorA:
     domain: capacity_factor
-    agent: d1
+    agent: a3
   gasFactorB:
     domain: capacity_factor
-    agent: d2
+    agent: b3
   gasFactorC:
     domain: capacity_factor
-    agent: d3
-
+    agent: c3
   transmissionAB:
     domain: max_transmission_capacity_A_B
-    agent: c1
+    agent: d1
   transmissionBA:
     domain: max_transmission_capacity_A_B
-    agent: c2
+    agent: d2
   transmissionBC:
     domain: max_transmission_capacity_B_C
-    agent: c3
+    agent: d3
   transmissionCB:
     domain: max_transmission_capacity_B_C
-    agent: c4
+    agent: d4
 
 constraints:
   # Demand constraints
-    demand_A:
-      type: intention
-      function: |
-        if solarCapacityA * 1000 + gasCapacityA * gasFactorA * 8760 + transmissionBA - transmissionAB >= 5000:
-          return 0
-        else: 
-          return 10000
-    demand_B:
-      type: intention
-      function: |
-        if solarCapacityB * 1000 + gasCapacityB * gasFactorB * 8760 - transmissionBA + transmissionAB - transmissionBC + transmissionCB >= 7000:
-          return 0
-        else: 
-          return 10000         
-    demand_C:
-      type: intention
-      function: |
-        if solarCapacityC * 1000 + gasCapacityC * gasFactorC *  8760 + transmissionBC - transmissionCB >= 4000:
-          return 0
-        else:
-          return 10000
+  demand_A:
+    type: intention
+    function: |
+      if solarCapacityA * 1000 + gasCapacityA * gasFactorA * 8760 + transmissionBA - transmissionAB >= 5000:
+        return 0
+      else: 
+        return -10000
+  demand_B:
+    type: intention
+    function: |
+      if solarCapacityB * 1000 + gasCapacityB * gasFactorB * 8760 - transmissionBA + transmissionAB - transmissionBC + transmissionCB >= 7000:
+        return 0
+      else: 
+        return -10000 
+         
+  demand_C:
+    type: intention
+    function: |
+      if solarCapacityC * 1000 + gasCapacityC * gasFactorC *  8760 + transmissionBC - transmissionCB >= 4000:
+        return 0
+      else:
+        return -10000
+
+# Limits on the Capacity to install
+  gas_installed_capacity_A:
+    type: intention
+    function: |
+      if gasCapacityA >= 1:
+        return 0
+      else:
+        return -10000
+  gas_installed_capacity_B:
+    type: intention
+    function: |
+      if gasCapacityB >= 2:
+        return 0
+      else:
+        return -10000
+  gas_installed_capacity_C:
+    type: intention
+    function: |
+      if gasCapacityC >= 1:
+        return 0
+      else:
+        return -10000
+  solar_installed_capacity_A:
+    type: intention
+    function: |
+      if solarCapacityA <= 5:
+        return 0
+      else:
+        return -10000
+  solar_installed_capacity_B:
+    type: intention
+    function: |
+      if solarCapacityB <= 2:
+        return 0
+      else:
+        return -10000 
+  solar_installed_capacity_C:
+    type: intention
+    function: |
+      if solarCapacityC <= 8:
+        return 0
+      else:
+        return -10000
+
+# Emission Cap
+  emissions_penalty_max_A:
+    type: intention
+    function: |
+      return -10000 / (1 + (2.71828 ** -((gasCapacityA * gasFactorA * 8760 * 0.5 - 670) / 100)))
+  emissions_penalty_max_B:
+    type: intention
+    function: |
+      return -10000 / (1 + (2.71828 ** -((gasCapacityB * gasFactorB * 8760 * 0.5 - 670) / 100)))
+  emissions_penalty_max_C:
+    type: intention
+    function: |
+      return -10000 / (1 + (2.71828 ** -((gasCapacityC * gasFactorC * 8760 * 0.5 - 670) / 100)))
+
+# Total cost to minimize - Without the following constraints, the model finds my solution
+  total_cost_solarA:
+    type: intention
+    function: |
+      solarInvestmentCost = 300  
+      solarOperatingCost = 10
+      gasInvestmentCost = 150
+      gasOperatingCost = 20
+      transmissionCost = 0
+      gasExistingCapacityA = 1  
+      gasExistingCapacityB = 2
+      gasExistingCapacityC = 1
+      
+      cost = (
+        solarInvestmentCost * solarCapacityA + solarOperatingCost * solarCapacityA * 1000 
+      )
+      
+      return -cost/100  # Minimization objective
   
-  # Limits on the Capacity to install
-    gas_installed_capacity_A:
+  total_cost_gasA:
+    type: intention
+    function: |
+      solarInvestmentCost = 300  
+      solarOperatingCost = 10
+      gasInvestmentCost = 150
+      gasOperatingCost = 20
+      transmissionCost = 0
+      gasExistingCapacityA = 1  
+      gasExistingCapacityB = 2
+      gasExistingCapacityC = 1
+      
+      cost = (
+        gasInvestmentCost * (gasCapacityA - gasExistingCapacityA) + gasOperatingCost * gasCapacityA * gasFactorA * 8760 
+      )
+      
+      return -cost/100  # Minimization objective
+  
+    total_cost_solarB:
       type: intention
       function: |
-        if gasCapacityA >= 1:
-          return 0
-        else:
-          return 10000
-    gas_installed_capacity_B:
-      type: intention
-      function: |
-        if gasCapacityB >= 2:
-          return 0
-        else:
-          return 10000
-    gas_installed_capacity_C:
-      type: intention
-      function: |
-        if gasCapacityC >= 1:
-          return 0
-        else:
-          return 10000
-    solar_installed_capacity_A:
-      type: intention
-      function: |
-        if solarCapacityA <= 5:
-          return 0
-        else:
-          return 10000
-    solar_installed_capacity_B:
-      type: intention
-      function: |
-        if solarCapacityB <= 2:
-          return 0
-        else:
-          return 10000 
-    solar_installed_capacity_C:
-      type: intention
-      function: |
-        if solarCapacityC <= 8:
-          return 0
-        else:
-          return 10000
-
-  # Emission Cap
-    total_emissions:
-      type: intention
-      function: |
-        emissions = (gasCapacityA * gasFactorA + gasCapacityB * gasFactorB + gasCapacityC * gasFactorC) * 8760 * 0.5
-        return 10000 / (1 + (2.71828 ** -((emissions - 2000) / 100)))
-
-
-  # Total cost to minimize
-    total_cost:
-      type: intention
-      function: |
-        solarInvestmentCost = 300  # Example values, replace as needed
+        solarInvestmentCost = 300  
         solarOperatingCost = 10
         gasInvestmentCost = 150
         gasOperatingCost = 20
         transmissionCost = 0
-        gasExistingCapacityA = 1  # Replace with actual values
+        gasExistingCapacityA = 1  
         gasExistingCapacityB = 2
         gasExistingCapacityC = 1
         
         cost = (
-          solarInvestmentCost * solarCapacityA + solarOperatingCost * solarCapacityA * 1000 +
-          gasInvestmentCost * (gasCapacityA - gasExistingCapacityA) + gasOperatingCost * gasCapacityA * gasFactorA * 8760 +
           solarInvestmentCost * solarCapacityB + solarOperatingCost * solarCapacityB * 1000 +
-          gasInvestmentCost * (gasCapacityB - gasExistingCapacityB) + gasOperatingCost * gasCapacityB * gasFactorB * 8760 +
-          solarInvestmentCost * solarCapacityC + solarOperatingCost * solarCapacityC * 1000 +
-          gasInvestmentCost * (gasCapacityC - gasExistingCapacityC) + gasOperatingCost * gasCapacityC * gasFactorC * 8760 +
-          transmissionCost * (transmissionAB + transmissionBA + transmissionBC + transmissionCB)
         )
         
-        return cost/1000  # Minimization objective
+        return -cost/100  # Minimization objective   
+
+    total_cost_gasB:
+      type: intention
+      function: |
+        solarInvestmentCost = 300  
+        solarOperatingCost = 10
+        gasInvestmentCost = 150
+        gasOperatingCost = 20
+        transmissionCost = 0
+        gasExistingCapacityA = 1  
+        gasExistingCapacityB = 2
+        gasExistingCapacityC = 1
+        
+        cost = (
+          gasInvestmentCost * (gasCapacityB - gasExistingCapacityB) + gasOperatingCost * gasCapacityB * gasFactorB * 8760 +
+        )
+        
+        return -cost/100  # Minimization objective
+  
+    total_cost_solarC:
+      type: intention
+      function: |
+        solarInvestmentCost = 300  
+        solarOperatingCost = 10
+        gasInvestmentCost = 150
+        gasOperatingCost = 20
+        transmissionCost = 0
+        gasExistingCapacityA = 1  
+        gasExistingCapacityB = 2
+        gasExistingCapacityC = 1
+        
+        cost = (
+          solarInvestmentCost * solarCapacityC + solarOperatingCost * solarCapacityC * 1000 +
+        )
+        
+        return -cost/100   
+  
+    total_cost_gasC:
+      type: intention
+      function: |
+        solarInvestmentCost = 300  
+        solarOperatingCost = 10
+        gasInvestmentCost = 150
+        gasOperatingCost = 20
+        transmissionCost = 0
+        gasExistingCapacityA = 1  
+        gasExistingCapacityB = 2
+        gasExistingCapacityC = 1
+        
+        cost = (
+          gasInvestmentCost * (gasCapacityC - gasExistingCapacityC) + gasOperatingCost * gasCapacityC * gasFactorC * 8760 +
+        )
+        
+        return -cost/100
+
+  total_cost_transmissionsAB:
+      type: intention
+      function: |
+        solarInvestmentCost = 300  
+        solarOperatingCost = 10
+        gasInvestmentCost = 150
+        gasOperatingCost = 20
+        transmissionCost = 0
+        gasExistingCapacityA = 1  
+        gasExistingCapacityB = 2
+        gasExistingCapacityC = 1
+        
+        cost = (
+          transmissionCost * (transmissionAB + transmissionBA)
+        )
+        
+        return -cost/100
+
+  total_cost_transmissionsBC:
+      type: intention
+      function: |
+        solarInvestmentCost = 300  
+        solarOperatingCost = 10
+        gasInvestmentCost = 150
+        gasOperatingCost = 20
+        transmissionCost = 0
+        gasExistingCapacityA = 1  
+        gasExistingCapacityB = 2
+        gasExistingCapacityC = 1
+        
+        cost = (
+          transmissionCost * (transmissionAB + transmissionBA + transmissionBC + transmissionCB)
+        )
+        return -cost/100
 
 
-agents: [a1, a2, a3, b1, b2, b3, c1, c2, c3, c4, d1, d2, d3]
+agents: [a1, a2, a3, b1, b2, b3, c1, c2, c3, d1, d2, d3, d4]
